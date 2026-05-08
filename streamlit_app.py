@@ -32,9 +32,14 @@ def decode_upload(uploaded_file) -> np.ndarray:
 
 
 def load_default_image() -> np.ndarray:
-    default_path = ROOT / "outputs" / "input_rgb.png"
-    if default_path.exists():
-        return np.asarray(Image.open(default_path).convert("RGB"))
+    default_candidates = [
+        ROOT / "assets" / "default_image.jpg",
+        ROOT / "assets" / "default_image.png",
+        ROOT / "outputs" / "input_rgb.png",
+    ]
+    for default_path in default_candidates:
+        if default_path.exists():
+            return np.asarray(Image.open(default_path).convert("RGB"))
 
     x = np.linspace(0, 255, 360, dtype=np.uint8)
     y = np.linspace(0, 255, 240, dtype=np.uint8)
@@ -71,8 +76,10 @@ def main() -> None:
         except ValueError as exc:
             st.error(str(exc))
             return
+        image_source = "上传图片"
     else:
         rgb = load_default_image()
+        image_source = "默认图片"
 
     st.sidebar.markdown("### 插值参数")
     scale = st.sidebar.slider("缩放比例", min_value=0.3, max_value=2.5, value=1.5, step=0.1)
@@ -83,7 +90,7 @@ def main() -> None:
     tab_input, tab_color, tab_interp, tab_report = st.tabs(["原图", "颜色空间", "图像插值", "提交说明"])
 
     with tab_input:
-        st.image(rgb, caption=f"输入图像：{rgb.shape[1]} x {rgb.shape[0]}", use_container_width=True)
+        st.image(rgb, caption=f"{image_source}：{rgb.shape[1]} x {rgb.shape[0]}", use_container_width=True)
 
     with tab_color:
         hsv = rgb_to_hsv_manual(rgb)
